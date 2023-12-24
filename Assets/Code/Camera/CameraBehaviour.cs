@@ -5,37 +5,46 @@ using UnityEngine;
 public class CameraBehaviour : MonoBehaviour
 {
     [Header("VARIABLES")]
-    [SerializeField] private float angleLimit = 30.0f; // El límite de rotación en grados.
-    [SerializeField] private float speed = 10.0f; // La velocidad de rotación.
+    [SerializeField] private float angleLimit = 30.0f;
+    [SerializeField] private float speed = 10.0f;
+    [SerializeField] private float currentAngle = 0.0f;
+    [SerializeField] private int direction = 1;
+    [SerializeField] private Vector3 initialRotation;
+    [SerializeField] private float waitTime = 1.0f;
 
-    [SerializeField] private float currentAngle = 0.0f; // El ángulo actual de rotación.
-    [SerializeField] private int direction = 1; // La dirección de la rotación: 1 para derecha, -1 para izquierda.
-    [SerializeField] private Vector3 initialRotation; // Rotación inicial de la cámara.
+    private bool isWaiting = false; // Indica si la cámara está en espera
 
     void Start()
     {
-        // Guarda la rotación inicial de la cámara.
         initialRotation = transform.rotation.eulerAngles;
     }
 
     void Update()
     {
-        // Calcula la nueva rotación.
-        currentAngle += direction * speed * Time.deltaTime;
-
-        // Revisa si la cámara ha alcanzado o superado el límite.
-        if (currentAngle > angleLimit)
+        if (!isWaiting)
         {
-            currentAngle = angleLimit;
-            direction *= -1;
-        }
-        else if (currentAngle < -angleLimit)
-        {
-            currentAngle = -angleLimit;
-            direction *= -1;
-        }
+            currentAngle += direction * speed * Time.deltaTime;
 
-        // Aplica la rotación a la cámara.
-        transform.localRotation = Quaternion.Euler(initialRotation.x, initialRotation.y + currentAngle, initialRotation.z);
+            if (currentAngle > angleLimit || currentAngle < -angleLimit)
+            {
+                StartCoroutine(WaitAndChangeDirection());
+            }
+
+            transform.localRotation = Quaternion.Euler(initialRotation.x, initialRotation.y + currentAngle, initialRotation.z);
+        }
+    }
+
+    IEnumerator WaitAndChangeDirection()
+    {
+        isWaiting = true; // La cámara comienza a esperar
+
+        // Ajusta el ángulo y cambia la dirección
+        currentAngle = Mathf.Clamp(currentAngle, -angleLimit, angleLimit);
+        direction *= -1;
+
+        // Espera un segundo
+        yield return new WaitForSeconds(waitTime);
+
+        isWaiting = false; // La cámara termina de esperar
     }
 }

@@ -7,9 +7,8 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    public List<GameObject> cameras;
-    public GameObject currentCamera;
-    public int cameraIndex;
+    [SerializeField] private CameraMapController cmController;
+    [SerializeField] public GameObject mainCamera;
 
     public void Awake()
     {
@@ -23,43 +22,12 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void Start()
-    {
-        currentCamera = cameras.First();
-        cameraIndex = 0;
-        DeactivateCameras();
-    }
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && cmController.isActive == false)
         {
-            if (cameraIndex >= cameras.Count() - 1)
-            {
-                cameraIndex = 0;
-            }
-            else
-            {
-                cameraIndex++;
-            }
-
-            currentCamera = cameras[cameraIndex];
-            DeactivateCameras();
-   
-        }
-    }
-
-    private void DeactivateCameras()
-    {
-        foreach (GameObject go in cameras)
-        {
-            if(go == currentCamera)
-            {
-                go.SetActive(true);
-            }
-            else
-            {
-                go.SetActive(false);
-            }
+            cmController.gameObject.SetActive(true);
+            cmController.isActive = true;
         }
     }
 }
